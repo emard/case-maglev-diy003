@@ -64,8 +64,9 @@ module casing(up=1,down=1)
   h_feet_above=h_parts+clr_above;
   cable_cut_angle=45;
   l_angular=h_cable/cos(cable_cut_angle);
-  w_angular=h_cable*2-2*clr_halfs/cos(cable_cut_angle);
-
+  w_angular=h_cable*2-2*clr_halfs/cos(cable_cut_angle)*1.1;
+  d_angular=clr_halfs/cos(cable_cut_angle);
+    
   // the feet
   for(i=[0:n_screws-1])
     rotate([0,0,screw_angle*i+angle_hole])
@@ -113,13 +114,12 @@ module casing(up=1,down=1)
       cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
       // cut cable slits, angular
       // angular-length
-      if(1)
       translate([0,d_case_out/2,h_cable])
         // translate([])
         for(r=[-1:2:1])
         rotate([0,cable_cut_angle*r,0])
         translate([0,0,-l_angular/2])
-        cube([clr_halfs,d_case_out,l_angular],center=true);
+        cube([d_angular,d_case_out,l_angular],center=true);
       // cut cable hole
       translate([0,d_case_out/2,h_cable])
         rotate([90,0,0])
@@ -145,7 +145,7 @@ module casing(up=1,down=1)
 
 difference()
 {
-  casing(up=1,down=0);
+  casing(up=1,down=1);
   translate([0,-100,0])
     cube([200,200,30],center=true);    
 }
