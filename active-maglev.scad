@@ -2,7 +2,7 @@
 d_pcb=75; // PCB diameter
 t_pcb=1.6; // PCB thickness
 h_spacer=6; // space below PCB
-d_spacer=6; // spacer diameter
+d_spacer=8; // spacer diameter
 h_parts=12; // space above PCB
 d_parts=60; // parts placement big diameter
 d1_part=12; // part diameter
@@ -66,8 +66,12 @@ module casing(up=1,down=1)
   l_angular=h_cable/cos(cable_cut_angle);
   w_angular=h_cable*2-2*clr_halfs/cos(cable_cut_angle)*1.1;
   d_angular=clr_halfs/cos(cable_cut_angle);
-    
-  // the feet
+  
+  difference() // for the screw holes
+  {
+  union()
+  {
+      // the feet
   for(i=[0:n_screws-1])
     rotate([0,0,screw_angle*i+angle_hole])
     {
@@ -105,13 +109,21 @@ module casing(up=1,down=1)
     }
       // separate halfs
       cylinder(d=d_case_out+0.01,h=clr_halfs,$fn=n_fine,center=true);
-      // cut up or down
+      // cut down if not enabled
       if(down < 0.5)
       translate([0,0,-h_case_out/2])
       cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
+      // cut up if not enabled
       if(up < 0.5)
-      translate([0,0,h_case_out/2])
-      cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
+      difference()
+      {
+        translate([0,0,h_case_out/2])
+          cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
+        // don't cut the cable holder
+        translate([0,0,h_cable-w_angular/2*1.1])
+        rotate([90,0,0])
+        cylinder(d=w_angular*1.1,h=d_case_out,$fn=4,center=true);
+      }
       // cut cable slits, angular
       // angular-length
       translate([0,d_case_out/2,h_cable])
@@ -139,13 +151,42 @@ module casing(up=1,down=1)
        cylinder(d=d_case_in,h=h_case_in,center=true,$fn=n_fine);
     }
     }
+  }
+    // drill the screw holes
+    for(i=[0:n_screws-1])
+      rotate([0,0,screw_angle*i+angle_hole])
+      {
+      // cut holes for feet below
+      translate([d_screws/2,0,-h_spacer-5])
+          rotate([0,180,0])
+          screw_hole();
+      }
+  }
+}
+
+module screw_hole(h_head=4,d_screw_head=5,h_screw_transition=2,l_screw=4)
+{
+    h=h_head;
+    translate([0,0,-l_screw/2-h_head-h_screw_transition])
+    union()
+    {
+      // bigger hole, no contact
+          cylinder(d=2.5,h=l_screw+0.01,$fn=6,center=true);
+          // head
+          translate([0,0,h/2+l_screw/2+h_screw_transition])
+            cylinder(d=d_screw_head,h=h,$fn=16,center=true);
+          translate([0,0,h_screw_transition/2+l_screw/2])
+            cylinder(d2=d_screw_head,d1=2.5,h=h_screw_transition+0.01,$fn=16,center=true);
+    }
 }
 
 %pcb();
 
 difference()
 {
-  casing(up=1,down=1);
+  casing(up=0,down=1);
   translate([0,-100,0])
     cube([200,200,30],center=true);    
 }
+
+screw_hole();
