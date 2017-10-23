@@ -111,8 +111,13 @@ module casing(up=1,down=1)
       cylinder(d=d_case_out+0.01,h=clr_halfs,$fn=n_fine,center=true);
       // cut down if not enabled
       if(down < 0.5)
-      translate([0,0,-h_case_out/2])
-      cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
+      {
+        translate([0,0,-h_case_out/2])
+          cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
+        translate([0,d_case_out/2,h_cable-w_angular/2*1.1])
+        rotate([90,0,0])
+        cylinder(d=w_angular*1.1,h=d_case_out,$fn=4,center=true);
+      }
       // cut up if not enabled
       if(up < 0.5)
       difference()
@@ -120,7 +125,7 @@ module casing(up=1,down=1)
         translate([0,0,h_case_out/2])
           cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
         // don't cut the cable holder
-        translate([0,0,h_cable-w_angular/2*1.1])
+        translate([0,d_case_out/2,h_cable-w_angular/2*1.1])
         rotate([90,0,0])
         cylinder(d=w_angular*1.1,h=d_case_out,$fn=4,center=true);
       }
@@ -137,8 +142,8 @@ module casing(up=1,down=1)
         rotate([90,0,0])
         cylinder(d=d_cable,h=h_cable,center=true,$fn=16);
     }
-  // connect the cable cut
-    if(1)
+    // connect the cable cut
+    if(down>0.5)
     intersection()
     {
       // limit to cable cut area
@@ -165,7 +170,7 @@ module casing(up=1,down=1)
   }
 }
 
-module screw_hole(h_head=4,d_screw_head=5,h_screw_transition=2,l_screw=3)
+module screw_hole(h_head=5,d_screw_head=5,h_screw_transition=2,l_screw=2)
 {
     h=h_head;
     translate([0,0,-l_screw/2-h_head-h_screw_transition])
@@ -181,12 +186,22 @@ module screw_hole(h_head=4,d_screw_head=5,h_screw_transition=2,l_screw=3)
     }
 }
 
-%pcb();
 
+// assembly
+if(1)
+{
+    %pcb();
 difference()
 {
-  casing(up=1,down=0);
+  casing(up=1,down=1);
   translate([0,-100,0])
-    cube([200,200,30],center=true);    
+    cube([200,200,40],center=true);    
+}
 }
 
+if(0) // UP
+  rotate([180,0,0])
+  casing(up=1,down=0);
+
+if(0) // DOWN
+  casing(up=0,down=1);
