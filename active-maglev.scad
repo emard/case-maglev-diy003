@@ -100,7 +100,7 @@ module casing(up=1,down=1)
     n_fine=64;
     difference()
     {
-    translate([0,0,h_spacer/2])
+    translate([0,0,h_spacer/2+thick/2])
     difference()
     {
        cylinder(d=d_case_out,h=h_case_out,center=true,$fn=n_fine);
@@ -153,18 +153,19 @@ module casing(up=1,down=1)
     }
   }
     // drill the screw holes
+    if(1)
     for(i=[0:n_screws-1])
       rotate([0,0,screw_angle*i+angle_hole])
       {
       // cut holes for feet below
-      translate([d_screws/2,0,-h_spacer-5])
+      translate([d_screws/2,0,-h_spacer-3])
           rotate([0,180,0])
           screw_hole();
       }
   }
 }
 
-module screw_hole(h_head=4,d_screw_head=5,h_screw_transition=2,l_screw=4)
+module screw_hole(h_head=4,d_screw_head=5,h_screw_transition=2,l_screw=3)
 {
     h=h_head;
     translate([0,0,-l_screw/2-h_head-h_screw_transition])
@@ -184,9 +185,8 @@ module screw_hole(h_head=4,d_screw_head=5,h_screw_transition=2,l_screw=4)
 
 difference()
 {
-  casing(up=0,down=1);
+  casing(up=1,down=0);
   translate([0,-100,0])
     cube([200,200,30],center=true);    
 }
 
-screw_hole();
