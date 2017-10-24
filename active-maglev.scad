@@ -3,7 +3,7 @@ d_pcb=75; // PCB diameter
 t_pcb=1.6+0.3; // PCB thickness + some clearance
 h_spacer=6; // space below PCB
 d_spacer=8; // spacer diameter
-h_parts=12.0; // space above PCB
+h_parts=12; // space above PCB
 d_parts=60; // parts placement big diameter
 d1_part=12; // part diameter
 d_adjhole=4; // adjustment hole diameter
@@ -101,22 +101,22 @@ module casing(up=1,down=1)
       }
       // feet above
       if(up>0.5)
-      translate([d_screws/2,0,t_pcb/2+h_feet_above/2])
+      translate([d_screws/2,0,t_pcb/2+(h_feet_above+clr_above)/2])
       difference()
       {
-        cylinder(d=d_spacer,h=h_feet_above,center=true,$fn=16);
-        cylinder(d=d_nut,h=h_feet_above+0.01,center=true,$fn=16);
+        cylinder(d=d_spacer,h=h_feet_above+clr_above,center=true,$fn=16);
+        cylinder(d=d_nut,h=h_feet_above+clr_above+0.01,center=true,$fn=16);
       }
     }
     // the casing
     d_case_out=d_pcb+2*clr_r+2*thick;
-    h_case_out=t_pcb+h_spacer+h_feet_above+2*thick;
+    h_case_out=t_pcb+h_spacer+h_feet_above+2*thick+clr_above;
     d_case_in=d_pcb+2*clr_r;
-    h_case_in=t_pcb+h_spacer+h_feet_above;
-    n_fine=64;
+    h_case_in=h_case_out-2*thick;
+    n_fine=128;
     difference()
     {
-    translate([0,0,h_spacer/2+thick/2])
+    translate([0,0,h_case_out/2-h_spacer-thick-t_pcb/2])
     difference()
     {
        cylinder(d=d_case_out,h=h_case_out,center=true,$fn=n_fine);
@@ -230,6 +230,7 @@ if(1)
 difference()
 {
   casing(up=1,down=1);
+  rotate([0,0,15])
   translate([0,-100,0])
     cube([200,200,40],center=true);    
 }
