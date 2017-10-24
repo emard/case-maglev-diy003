@@ -1,9 +1,9 @@
 // electronics casing
 d_pcb=75; // PCB diameter
-t_pcb=1.6; // PCB thickness
+t_pcb=1.6+0.3; // PCB thickness + some clearance
 h_spacer=6; // space below PCB
 d_spacer=8; // spacer diameter
-h_parts=12.5; // space above PCB
+h_parts=12.0; // space above PCB
 d_parts=60; // parts placement big diameter
 d1_part=12; // part diameter
 d_adjhole=4; // adjustment hole diameter
