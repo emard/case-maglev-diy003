@@ -3,9 +3,11 @@ d_pcb=75; // PCB diameter
 t_pcb=1.6; // PCB thickness
 h_spacer=6; // space below PCB
 d_spacer=8; // spacer diameter
-h_parts=12; // space above PCB
+h_parts=12.5; // space above PCB
 d_parts=60; // parts placement big diameter
 d1_part=12; // part diameter
+d_adjhole=4; // adjustment hole diameter
+adj_holes=[[5,0],[5,6]];
 n_parts=4;
 clr_above=1; // clearance above parts
 clr_r=1; // radial clearance to PCB
@@ -24,16 +26,30 @@ d_nut=1.8; // plastic "nut" hole
 angle_hole=20; // deg hole angle relative to the connector
 
 d_cable=4; // cable dia
-h_cable=11; // height above half
+h_cable=12; // height above half
+a_cable=-9; // cable position angle
 
 // tight_cable=0.5; // tighten it
 
 // the levitator magnetic core
-
 h1_core=7.35;
 d1_core=33;
 d2_core=24;
 h2_core=4;
+
+
+ufo_main_d=80;
+ufo_top_h=10;
+ufo_top_d=24;
+
+
+module core()
+{
+  translate([0,0,h1_core/2])
+    cylinder(d=d1_core,h=h1_core,$fn=64,center=true);
+  translate([0,0,-h2_core/2])
+    cylinder(d=d2_core,h=h2_core,$fn=64,center=true);
+}
 
 
 module pcb()
@@ -106,6 +122,13 @@ module casing(up=1,down=1)
        cylinder(d=d_case_out,h=h_case_out,center=true,$fn=n_fine);
        // cut interior
        cylinder(d=d_case_in,h=h_case_in,center=true,$fn=n_fine);
+       // cut adjustment holes
+       for(a=[0:len(adj_holes)-1])
+       {
+         translate([0,0,-h_case_in])
+         translate(adj_holes[a])
+           cylinder(d=d_adjhole,h=h_case_out+1,center=true,$fn=16);
+       }
     }
       // separate halfs
       cylinder(d=d_case_out+0.01,h=clr_halfs,$fn=n_fine,center=true);
@@ -114,6 +137,7 @@ module casing(up=1,down=1)
       {
         translate([0,0,-h_case_out/2])
           cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
+        rotate([0,0,a_cable])
         translate([0,d_case_out/2,h_cable-w_angular/2*1.1])
         rotate([90,0,0])
         cylinder(d=w_angular*1.1,h=d_case_out,$fn=4,center=true);
@@ -125,12 +149,15 @@ module casing(up=1,down=1)
         translate([0,0,h_case_out/2])
           cylinder(d=d_case_out+0.01,h=h_case_out,$fn=n_fine,center=true);
         // don't cut the cable holder
+        rotate([0,0,a_cable])
         translate([0,d_case_out/2,h_cable-w_angular/2*1.1])
         rotate([90,0,0])
         cylinder(d=w_angular*1.1,h=d_case_out,$fn=4,center=true);
       }
       // cut cable slits, angular
-      // angular-length
+      rotate([0,0,a_cable])
+      union()
+      {
       translate([0,d_case_out/2,h_cable])
         // translate([])
         for(r=[-1:2:1])
@@ -141,9 +168,11 @@ module casing(up=1,down=1)
       translate([0,d_case_out/2,h_cable])
         rotate([90,0,0])
         cylinder(d=d_cable,h=h_cable,center=true,$fn=16);
+      }
     }
     // connect the cable cut
     if(down>0.5)
+    rotate([0,0,a_cable])
     intersection()
     {
       // limit to cable cut area
@@ -186,6 +215,13 @@ module screw_hole(h_head=5,d_screw_head=5,h_screw_transition=2,l_screw=2)
     }
 }
 
+module ufo()
+{
+
+  // bottom
+  cylinder(d1=ufo_main_d,d2=ufo_top_d,h=ufo_top_h,$fn=8,center=true);    
+}
+
 
 // assembly
 if(1)
@@ -197,7 +233,17 @@ difference()
   translate([0,-100,0])
     cube([200,200,40],center=true);    
 }
+
+  translate([0,0,35])
+    // %core();
+    ufo();
 }
+
+// test adjustment holes by
+// printing on paper
+if(0)
+  projection()
+    casing(up=0,down=1);
 
 if(0) // UP
   rotate([180,0,0])
@@ -205,3 +251,5 @@ if(0) // UP
 
 if(0) // DOWN
   casing(up=0,down=1);
+
+
