@@ -33,7 +33,7 @@ a_cable=-9; // cable position angle
 
 // the levitator magnetic core
 h1_core=7.35;
-d1_core=33;
+d1_core=35;
 d2_core=24;
 h2_core=4;
 
