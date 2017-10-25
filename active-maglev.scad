@@ -202,24 +202,24 @@ module casing(up=1,down=1)
   }
 }
 
-module screw_hole(h_head=5,d_screw_head=5,h_screw_transition=2,l_screw=2,d_nut=1.8,l_nut=3,d_thru=2.5)
+module screw_hole(h_head=5,d_screw_head=5,h_screw_transition=2,l_thru=2,d_nut=1.8,l_nut=3,d_thru=2.5)
 {
     h=h_head;
-    translate([0,0,-l_screw/2-h_head-h_screw_transition])
+    translate([0,0,-l_thru/2-h_head-h_screw_transition])
     union()
     {
       // nut hole
       //cylinder(d=d_nut,h=
-      translate([0,0,-l_screw/2-l_nut/2])
+      translate([0,0,-l_thru/2-l_nut/2])
       cylinder(d=d_nut,h=l_nut+0.01,$fn=6,center=true);
 
       // bigger hole, no contact
-          cylinder(d=d_thru,h=l_screw+0.01,$fn=6,center=true);
+          cylinder(d=d_thru,h=l_thru+0.01,$fn=6,center=true);
           // head
-          translate([0,0,h/2+l_screw/2+h_screw_transition])
+          translate([0,0,h/2+l_thru/2+h_screw_transition])
             cylinder(d=d_screw_head,h=h,$fn=16,center=true);
           // transition
-          translate([0,0,h_screw_transition/2+l_screw/2])
+          translate([0,0,h_screw_transition/2+l_thru/2])
             cylinder(d2=d_screw_head,d1=2.5,h=h_screw_transition+0.01,$fn=16,center=true);
     }
 }
@@ -266,7 +266,7 @@ module ufo(up=1,down=1)
         rotate([0,0,a_ft*i])
           translate([x_ft,0,-ufo_top_h/2-0.01])
             rotate([180,0,0])
-            screw_hole();
+            screw_hole(h_head=2,l_thru=1,l_nut=4.8);        
   }
   
   // core holder
