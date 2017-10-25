@@ -42,8 +42,8 @@ ufo_main_d=90;
 ufo_top_h=14;
 ufo_top_d=40;
 ufo_cut_h=5;
-ufo_cut_t=0.5;
-ufo_thick=1.0;
+ufo_cut_t=0.1;
+ufo_thick=0.8;
 ufo_d2_clr=0.5; // core holder clearance
 
 module core()
@@ -227,9 +227,10 @@ module screw_hole(h_head=5,d_screw_head=5,h_screw_transition=2,l_thru=2,d_nut=1.
 module ufo(up=1,down=1)
 {
   nseg=8;
-      n_ft=8;
-      a_ft=360/n_ft;
-      x_ft=25;
+  n_ft=4;
+  a_ft=360/n_ft;
+  a_ft_start=a_ft/4;
+  x_ft=25;
   difference()
   {
   union()
@@ -240,60 +241,77 @@ module ufo(up=1,down=1)
     cylinder(d1=ufo_main_d,d2=ufo_top_d,h=ufo_top_h,$fn=nseg,center=true);
     // cut interior
     a_hull=atan(ufo_top_h/(ufo_main_d-ufo_top_d)/2);
-    inter_main_d=ufo_main_d*cos(a_hull)*0.9; // dirty fix
+    inter_main_d=ufo_main_d*cos(a_hull)*0.93; // dirty fix
     inter_top_d=ufo_top_d*cos(a_hull);
     cylinder(d1=inter_main_d,d2=inter_top_d-2*ufo_thick,h=ufo_top_h-ufo_thick*2,$fn=nseg,center=true);
   }
   // feet
   intersection()
   {
-      // enclosing shape
-      // cyl..
+      // trim off enclosing shape
       cylinder(d1=ufo_main_d,d2=ufo_top_d,h=ufo_top_h,$fn=nseg,center=true);
       // the feet
       for(i=[0:n_ft-1])
-        rotate([0,0,a_ft*i])
+        rotate([0,0,a_ft*i+a_ft_start])
           translate([x_ft,0,0])
             cylinder(d=8,h=20,$fn=16,center=true);
   }
-  
-  }
-    // 2-parts cut
-    translate([0,0,-ufo_top_h/2+ufo_cut_h])
-      cylinder(d2=ufo_main_d,h=ufo_cut_t,$fn=nseg,center=true);
-    // the screw holes
-      for(i=[0:n_ft-1])
-        rotate([0,0,a_ft*i])
-          translate([x_ft,0,-ufo_top_h/2-0.01])
-            rotate([180,0,0])
-            screw_hole(h_head=2,l_thru=1,l_nut=4.8);        
-  }
-  
   // core holder
-  translate([0,0,-ufo_top_h/2+ufo_thick+(h2_core-ufo_d2_clr)/2])
+  translate([0,0,-ufo_top_h/2+ufo_thick+(h2_core-ufo_d2_clr)/2-0.01])
   difference()
   {
     cylinder(d=d2_core+ufo_d2_clr+2*ufo_thick,h=h2_core-ufo_d2_clr,$fn=64,center=true);
-    cylinder(d=d2_core+ufo_d2_clr+0*ufo_thick,h=h2_core-ufo_d2_clr+0.01,$fn=64,center=true);
+    cylinder(d=d2_core+ufo_d2_clr+0*ufo_thick,h=h2_core,$fn=64,center=true);
   }
+  }
+    // 2-parts cut
+    translate([0,0,-ufo_top_h/2+ufo_cut_h])
+      cylinder(d=ufo_main_d,h=ufo_cut_t,$fn=nseg,center=true);
+    // cut down part if disabled
+    if(down < 0.5)
+    translate([0,0,-ufo_top_h/2+ufo_cut_h-ufo_top_h/2])
+      cylinder(d=ufo_main_d,h=ufo_top_h,$fn=nseg,center=true);
+    // cut up part if disabled
+    if(up < 0.5)
+    translate([0,0,-ufo_top_h/2+ufo_cut_h+ufo_top_h/2])
+      cylinder(d=ufo_main_d,h=ufo_top_h,$fn=nseg,center=true);
+
+    // the screw holes
+      for(i=[0:n_ft-1])
+        rotate([0,0,a_ft*i+a_ft_start])
+          translate([x_ft,0,-ufo_top_h/2-0.01])
+            rotate([180,0,0])
+            screw_hole(h_head=2,l_thru=1,l_nut=4.6);        
+  }
+
 }
 
 
 // assembly
-if(0)
+if(1)
 {
     %pcb();
-difference()
-{
+  difference()
+  {
   casing(up=1,down=1);
   rotate([0,0,15])
   translate([0,-100,0])
     cube([200,200,40],center=true);    
-}
+  }
 
   translate([0,0,35])
-    // %core();
+  {
+        difference()
+  {
     ufo();
+    if(1)
+    translate([0,-100,0])
+      cube([100,200,100],center=true);
+  }
+
+    translate([0,0,-ufo_top_h/2+ufo_thick+h2_core])
+      %core();
+  }
 }
 
 // test adjustment holes by
@@ -302,23 +320,17 @@ if(0)
   projection()
     casing(up=0,down=1);
 
-if(1)
-{
-  difference()
-  {
-    ufo();
-    translate([100,0,0])
-      cube([200,100,100],center=true);
-  }
-  translate([0,0,-ufo_top_h/2+ufo_thick+h2_core])
-  %core();
-}
-
-if(0) // UP
+if(0) // base UP
   rotate([180,0,0])
   casing(up=1,down=0);
 
-if(0) // DOWN
+if(0) // base DOWN
   casing(up=0,down=1);
 
+if(0) // UFO UP
+  rotate([180,0,0])
+  ufo(up=1,down=0);
+
+if(0) // base DOWN
+  ufo(up=0,down=1);
 
