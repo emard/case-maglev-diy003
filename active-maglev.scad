@@ -331,6 +331,6 @@ if(0) // UFO UP
   rotate([180,0,0])
   ufo(up=1,down=0);
 
-if(0) // base DOWN
+if(0) // UFO DOWN
   ufo(up=0,down=1);
 
