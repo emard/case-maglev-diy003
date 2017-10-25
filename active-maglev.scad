@@ -44,7 +44,8 @@ ufo_top_d=40;
 ufo_cut_h=5;
 ufo_cut_t=0.1;
 ufo_thick=0.8;
-ufo_d2_clr=0.5; // core holder clearance
+ufo_d1_clr=0.5; // top core holder clearance
+ufo_d2_clr=0.5; // bottom core holder clearance
 
 module core()
 {
@@ -256,13 +257,22 @@ module ufo(up=1,down=1)
           translate([x_ft,0,0])
             cylinder(d=8,h=20,$fn=16,center=true);
   }
-  // core holder
+  // bottom core holder
   translate([0,0,-ufo_top_h/2+ufo_thick+(h2_core-ufo_d2_clr)/2-0.01])
   difference()
   {
     cylinder(d=d2_core+ufo_d2_clr+2*ufo_thick,h=h2_core-ufo_d2_clr,$fn=64,center=true);
     cylinder(d=d2_core+ufo_d2_clr+0*ufo_thick,h=h2_core,$fn=64,center=true);
   }
+  // top core holder
+  translate([0,0,ufo_top_h/2-ufo_thick-(h1_core-ufo_d1_clr)/2+0.01])
+  difference()
+  {
+    cylinder(d=d1_core+ufo_d1_clr+2*ufo_thick,h=h1_core-ufo_d1_clr,$fn=64,center=true);
+    cylinder(d=d1_core+ufo_d1_clr+0*ufo_thick,h=h1_core,$fn=64,center=true);
+  }
+
+
   }
     // 2-parts cut
     translate([0,0,-ufo_top_h/2+ufo_cut_h])
@@ -281,7 +291,7 @@ module ufo(up=1,down=1)
         rotate([0,0,a_ft*i+a_ft_start])
           translate([x_ft,0,-ufo_top_h/2-0.01])
             rotate([180,0,0])
-            screw_hole(h_head=2,l_thru=1,l_nut=4.6);        
+            screw_hole(h_head=2,l_thru=1,l_nut=4.0);        
   }
 
 }
@@ -305,6 +315,7 @@ if(1)
   {
     ufo();
     if(1)
+    rotate([0,0,22.5])
     translate([0,-100,0])
       cube([100,200,100],center=true);
   }
