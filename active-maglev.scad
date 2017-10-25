@@ -38,10 +38,13 @@ d2_core=24;
 h2_core=4;
 
 
-ufo_main_d=80;
-ufo_top_h=10;
-ufo_top_d=24;
-
+ufo_main_d=90;
+ufo_top_h=14;
+ufo_top_d=40;
+ufo_cut_h=5;
+ufo_cut_t=0.5;
+ufo_thick=1.0;
+ufo_d2_clr=0.5; // core holder clearance
 
 module core()
 {
@@ -215,16 +218,34 @@ module screw_hole(h_head=5,d_screw_head=5,h_screw_transition=2,l_screw=2)
     }
 }
 
-module ufo()
+module ufo(up=1,down=1)
 {
-
-  // bottom
-  cylinder(d1=ufo_main_d,d2=ufo_top_d,h=ufo_top_h,$fn=8,center=true);    
+  nseg=8;
+  difference()
+  {
+    // main
+    cylinder(d1=ufo_main_d,d2=ufo_top_d,h=ufo_top_h,$fn=nseg,center=true);
+    // cut interior
+    a_hull=atan(ufo_top_h/(ufo_main_d-ufo_top_d)/2);
+    inter_main_d=ufo_main_d*cos(a_hull)*0.9; // dirty fix
+    inter_top_d=ufo_top_d*cos(a_hull);
+    cylinder(d1=inter_main_d,d2=inter_top_d-2*ufo_thick,h=ufo_top_h-ufo_thick*2,$fn=nseg,center=true);
+    // 2-parts cut
+    translate([0,0,-ufo_top_h/2+ufo_cut_h])
+      cylinder(d2=ufo_main_d,h=ufo_cut_t,$fn=nseg,center=true);
+  }
+  // core holder
+  translate([0,0,-ufo_top_h/2+ufo_thick+(h2_core-ufo_d2_clr)/2])
+  difference()
+  {
+    cylinder(d=d2_core+ufo_d2_clr+2*ufo_thick,h=h2_core-ufo_d2_clr,$fn=64,center=true);
+    cylinder(d=d2_core+ufo_d2_clr+0*ufo_thick,h=h2_core-ufo_d2_clr+0.01,$fn=64,center=true);
+  }
 }
 
 
 // assembly
-if(1)
+if(0)
 {
     %pcb();
 difference()
@@ -245,6 +266,18 @@ difference()
 if(0)
   projection()
     casing(up=0,down=1);
+
+if(1)
+{
+  difference()
+  {
+    ufo();
+    translate([100,0,0])
+      cube([200,100,100],center=true);
+  }
+  translate([0,0,-ufo_top_h/2+ufo_thick+h2_core])
+  %core();
+}
 
 if(0) // UP
   rotate([180,0,0])
